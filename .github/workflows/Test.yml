@@ -10,6 +10,8 @@ pipelines:
           - echo "You can skip running pipeline by adding [skip ci] or [ci skip] (with []) to the git commit message."
           - sf --version
           - sf plugins --core
+           - sf force:auth:jwt:grant -f server.key -i $SFDC_CONSUMER_KEY -u $SFDC_USER -d -s -r $SFDC_URL
+           - sf force:mdapi:deploy -d src -w 60 -l NoTestRun -u $SFDC_USER
           branches:
                    
     TEST ORG VALIDATION:
