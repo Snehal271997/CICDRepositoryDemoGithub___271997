@@ -13,9 +13,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+  
     - name: Setup SFDX
-      run: force:auth:jwt:grant -f server.key -i $SFDC_CONSUMER_KEY -u $SFDC_USER -d -s -r $SFDC_URL
-
+      uses: sfdx-actions/setup-sfdx@v1
+      with:
+        sfdx-auth-url: ${{ secrets.SFDX_AUTH_URL }}
+        
     - name: Deploy to Salesforce 
       run: force:mdapi:deploy -d src -w 60 -l NoTestRun -u $SFDC_USER
 
