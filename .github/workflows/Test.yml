@@ -5,7 +5,7 @@ image:
 pipelines:
   default:
     - step:
-        script:
+        job:
           - echo "Commited changes to a branch that does not match the listed branches in bitbucket-pipelines.yml."
           - echo "You can skip running pipeline by adding [skip ci] or [ci skip] (with []) to the git commit message."
           - sf --version
