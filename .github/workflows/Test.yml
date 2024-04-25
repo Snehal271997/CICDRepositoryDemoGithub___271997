@@ -20,7 +20,7 @@ jobs:
         sfdx-auth-url: ${{ secrets.SFDX_AUTH_URL }}
         
     - name: Deploy to Salesforce 
-      run: force:mdapi:deploy -d src -w 60 -l NoTestRun -u $SFDC_USER
+      run: sfdx force:mdapi:deploy -d src -w 60 -l NoTestRun -u $SFDC_USER
 
 
                    
