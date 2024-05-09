@@ -1,36 +1,54 @@
-# This is a basic workflow to help you get started with Actions
+# Unique name for this workflow
+name: Deploy integration branch to integration and staging/uat orgs
 
-name: CI
-
-# Controls when the workflow will run
+# Definition when the workflow should run
 on:
-  # Triggers the workflow on push or pull request events but only for the "Master" branch
-  push:
-    branches: [ "Master" ]
-  pull_request:
-    branches: [ "Master" ]
+    push:
+      paths:
+        - 'force-app/**'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# Jobs to be executed
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    deploy-branch-to-QA-org:
+        runs-on: ubuntu-latest
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        steps:
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+            # Checkout the source code
+            - name: 'Checkout source code'
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+                
+            # Install Salesforce CLI
+            - name: 'Install Salesforce CLI'
+              uses: sfdx-actions/setup-sfdx@v1
+              with:
+                sfdx-version: 'latest'
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+            # Install java as it is required for the next step
+            - name: 'Installing java'
+              run: |
+                sudo apt-get update
+                sudo apt install default-jdk
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+            # Install SFDX scanner
+            - name: 'Installing SFDX scanner'
+              run: sfdx plugins:install @salesforce/sfdx-scanner
+
+            - name: 'Scan code'
+              run: |
+                  sfdx scanner:run --format csv --target './**/*.cls' --category "Design,Best Practices,Performance,Security"
+
+            # Store secret for both otgs
+            - name: 'Populate auth file with SFDX_URL secret of the QA'
+              shell: bash
+              run: |
+                  echo ${{ secrets.SFDX_INTEGRATION_URL}} > ./SFDX_INTEGRATION_URL.txt
+
+            # Authenticate to org
+            - name: 'Authenticate to Integration Org'
+              run: sfdx auth:sfdxurl:store -f ./SFDX_INTEGRATION_URL.txt -s -a QA
+
+            - name: 'Deploy changes present in package.xml'
+              run: sfdx force:source:deploy --manifest package.xml
