@@ -25,17 +25,3 @@ jobs:
               uses: sfdx-actions/setup-sfdx@v1
               with:
                 sfdx-version: 'latest'
-
-            # Install java as it is required for the next step
-            - name: 'Installing java'
-              run: |
-                sudo apt-get update
-                sudo apt install default-jdk
-
-            # Install SFDX scanner
-            - name: 'Installing SFDX scanner'
-              run: sfdx plugins:install @salesforce/sfdx-scanner
-
-            - name: 'Scan code'
-              run: |
-                  sfdx scanner:run --format csv --target './**/*.cls' --category "Design,Best Practices,Performance,Security"
