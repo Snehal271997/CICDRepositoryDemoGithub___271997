@@ -5,7 +5,7 @@ name: Deploy integration branch to integration and staging/uat orgs
 on:
     push:
       paths:
-        - 'src/**'
+        - 'force-app/**'
 
 # Jobs to be executed
 jobs:
