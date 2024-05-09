@@ -1,5 +1,5 @@
-public with sharing class CICDdemoClass1 {
-    public CICDdemoClass1() {
+public class CICDdemoClass1 {
+    public static void CICDdemoClass1() {
         system.debug('Hello Everyone   ');
     
     }
