@@ -18,6 +18,7 @@
                     <default>false</default>
                     <label>Yes</label>
                 </value>
+
                 <value>
                     <fullName>No</fullName>
                     <default>false</default>
