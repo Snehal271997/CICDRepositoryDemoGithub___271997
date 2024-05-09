@@ -1,18 +1,30 @@
-name: SFDX-CLI Deploy from Repository
-on: [push]
+# Unique name for this workflow
+name: Deploy integration branch to integration and staging/uat orgs
+
+# Definition when the workflow should run
+on:
+    push:
+      paths:
+        - 'force-app/**'
+
+# Jobs to be executed
 jobs:
-  SFDX-CLI-Deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "GitHub Action running on ${{ runner.os }}"
-      - run: echo "Retrieving ${{ github.ref }} from ${{ github.repository }}."
-      - uses: actions/checkout@v2
-      - run: npm install sfdx-cli -g
-      
-      - run: echo "${{ secrets.SALESFORCE_JWT_SECRET_KEY }}" > server.key
-      - run: sfdx force:auth:jwt:grant --clientid=${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile=server.key --username=${{ secrets.SALESFORCE_DEVHUB_USERNAME }} --setdefaultdevhubusername
-      - run: sfdx force:source:deploy --d src --testlevel=RunLocalTests -u ${{ secrets.SALESFORCE_DEVHUB_USERNAME }}
-                   
-   
-           
-          
+    deploy-branch-to-QA-org:
+        runs-on: ubuntu-latest
+        if: ${{ github.actor != 'dependabot[bot]' }}
+        steps:
+
+            # Checkout the source code
+            - name: 'Checkout source code'
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+                
+            # Install Salesforce CLI
+            - name: 'Install Salesforce CLI'
+              uses: sfdx-actions/setup-sfdx@v1
+              with:
+                sfdx-version: 'latest'
+
+            - name: 'Authenticate Target Org'
+              run: sfdx force:auth:jwt:grant --clientid ${{ secrets.TARGET_CONSUMER_KEY }} --jwtkeyfile ./server.key --username ${{ secrets.TARGET_USERNAME }} --instanceurl ${{ secrets.TARGET_INSTANCE_URL }} --setdefaultdevhubusername -a targetOrg
